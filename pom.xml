@@ -16,6 +16,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <hadoop.version>3.3.0</hadoop.version>
   <hadoop.scope>provided</hadoop.scope>
   <hbase.version>2.4.1</hbase.version>
+  <hbase.scope>provided</hbase.scope>
 </properties>
 
 <dependencies>
@@ -51,7 +52,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <dependency>
     <groupId>org.apache.hbase</groupId>
     <artifactId>hbase-mapreduce</artifactId>
-    <version>${hbase.version}</version>  
+    <version>${hbase.version}</version>
+    <scope>${hbase.scope}</scope>
   </dependency>
   
 </dependencies>
