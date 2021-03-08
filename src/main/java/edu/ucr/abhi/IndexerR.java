@@ -5,13 +5,15 @@ import java.util.HashMap;
 import com.google.gson.Gson;
 
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableReducer;
+import org.apache.hadoop.hbase.util.Bytes;
+
 import org.apache.hadoop.io.Text;
 
-public class IndexerR  extends TableReducer<Text, Posting, Text> {
+public class IndexerR  extends TableReducer<Text, Posting, ImmutableBytesWritable> {
 
     private static final Gson gson = new Gson();
-    private static final Text json = new Text();
 
     @Override
     protected void reduce(
@@ -21,7 +23,7 @@ public class IndexerR  extends TableReducer<Text, Posting, Text> {
       ) throws IOException, InterruptedException {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
         for (Posting posting: postings) {
-          String website = posting.getWebsite().getBytes().toString();
+          String website = posting.getWebsite().toString();
           Integer count = posting.getCount().get();
           if (map.containsKey(website)){
             map.put(website, map.get(website) + count) ;
@@ -30,10 +32,11 @@ public class IndexerR  extends TableReducer<Text, Posting, Text> {
             map.put(website, count);
           }
         }
-        json.set(gson.toJson(map));
-        Put put = new Put(word.getBytes());
-        
-        put.addColumn("Index".getBytes(), "Json".getBytes(), json.getBytes());
-        context.write(word, put);
+        // TODO : this is only insert , need to handle update case where the key already is put
+        ImmutableBytesWritable key = new ImmutableBytesWritable(Bytes.toBytes(word.toString()));
+        String json = gson.toJson(map);
+        Put put = new Put(Bytes.toBytes(word.toString()));
+        put.addColumn(Bytes.toBytes("Index"), Bytes.toBytes("Json"), Bytes.toBytes(json));
+        context.write(key, put);
     }
 }

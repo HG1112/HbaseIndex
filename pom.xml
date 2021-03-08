@@ -14,9 +14,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
   <maven.compiler.source>1.11</maven.compiler.source>
   <maven.compiler.target>1.11</maven.compiler.target>
   <hadoop.version>3.3.0</hadoop.version>
-  <hadoop.scope>provided</hadoop.scope>
+  <hadoop.scope>compile</hadoop.scope>
   <hbase.version>2.4.1</hbase.version>
-  <hbase.scope>provided</hbase.scope>
+  <hbase.scope>compile</hbase.scope>
 </properties>
 
 <dependencies>

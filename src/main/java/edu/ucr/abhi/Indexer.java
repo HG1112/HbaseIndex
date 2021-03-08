@@ -5,6 +5,8 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.io.Text;
 
 
 public class Indexer {
@@ -12,8 +14,12 @@ public class Indexer {
         Configuration conf = HBaseConfiguration.create();
         Job job = Job.getInstance(conf, "Let's Index Ppl");
         job.setJarByClass(Indexer.class);
+        job.setInputFormatClass(TextInputFormat.class);
         job.setMapperClass(IndexerM.class);
-
+        job.setReducerClass(IndexerR.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(Posting.class);
+        
         String outputTable = "search";
         TableMapReduceUtil.initTableReducerJob(
           outputTable,

@@ -15,8 +15,11 @@ public class IndexerM extends Mapper<Object, Text, Text, Posting>{
     private Text file = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+
+      // Need to parse the website name from filenames
       String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
       file.set(fileName);
+
       StringTokenizer itr = new StringTokenizer(value.toString());
       while (itr.hasMoreTokens()) {
         word.set(itr.nextToken());

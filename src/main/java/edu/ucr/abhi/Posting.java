@@ -12,9 +12,14 @@ public class Posting implements Writable  {
     private Text website;
     private IntWritable count;
 
+    public Posting() {
+        website = new Text();
+        count = new IntWritable(0);
+    }
+
     public Posting(Text txt, IntWritable writable) {
-        this.website = txt;
-        this.count = writable;
+        website = txt;
+        count = writable;
     }
 
     @Override
@@ -45,4 +50,8 @@ public class Posting implements Writable  {
         count.readFields(in);
     }
     
+    @Override
+    public String toString() {
+        return website + "|" + count;
+    }
 }
