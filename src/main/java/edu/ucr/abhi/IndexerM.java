@@ -1,32 +1,45 @@
 package edu.ucr.abhi;
 import java.io.IOException;
+import java.net.URL;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 
 public class IndexerM extends Mapper<Object, Text, Text, Posting>{
 
-    private static final String EDU = ".edu";
     private static IntWritable one = new IntWritable(1);
     private Text word = new Text();
-    private Text file = new Text();
-
-    public String fileName(Context context) {
-      String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
-      fileName = fileName.split(EDU)[0] + EDU;
-      return fileName;
-    }
+    private Text root = new Text();
+    private Text hyperlink = new Text();
+    private Text title = new Text();
 
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-      file.set(fileName(context));
-      StringTokenizer itr = new StringTokenizer(value.toString());
-      while (itr.hasMoreTokens()) {
-        word.set(itr.nextToken());
-        context.write(word, new Posting(file, one));
+      Document html = Jsoup.parse(value.toString());
+
+      Elements url = html.select("url");
+      if (!url.isEmpty()) root.set(new URL(url.text()).getHost());
+
+      title.set(html.title());
+
+      for (Element elem : html.getAllElements()) {
+
+        if (elem.hasAttr("href")) 
+          hyperlink.set(elem.attr("href"));
+
+        StringTokenizer itr = new StringTokenizer(elem.ownText());
+
+        while (itr.hasMoreTokens()) {
+          word.set(itr.nextToken());
+          context.write(word, new Posting(root, hyperlink, title, one));
+        }
       }
+      
     }
   }
