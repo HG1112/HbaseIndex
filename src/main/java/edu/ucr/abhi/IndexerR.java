@@ -2,8 +2,6 @@ package edu.ucr.abhi;
 import java.io.IOException;
 import java.util.HashMap;
 
-import com.google.gson.Gson;
-
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableReducer;
@@ -13,7 +11,7 @@ import org.apache.hadoop.io.Text;
 
 public class IndexerR  extends TableReducer<Text, Posting, ImmutableBytesWritable> {
 
-    private static final Gson gson = new Gson();
+    private static final String COUNT = "count";
 
     @Override
     protected void reduce(
@@ -32,11 +30,13 @@ public class IndexerR  extends TableReducer<Text, Posting, ImmutableBytesWritabl
             map.put(website, count);
           }
         }
-        // TODO : this is only insert , need to handle update case where the key already is put
+        // TODO : this is only insert , need to handle update case where the key already is present
         ImmutableBytesWritable key = new ImmutableBytesWritable(Bytes.toBytes(word.toString()));
-        String json = gson.toJson(map);
         Put put = new Put(Bytes.toBytes(word.toString()));
-        put.addColumn(Bytes.toBytes("Index"), Bytes.toBytes("Json"), Bytes.toBytes(json));
+        
+        for (String website: map.keySet()) {
+          put.addColumn(Bytes.toBytes(website), Bytes.toBytes(COUNT), Bytes.toBytes(map.get(website).toString()));
+        }
         context.write(key, put);
     }
 }

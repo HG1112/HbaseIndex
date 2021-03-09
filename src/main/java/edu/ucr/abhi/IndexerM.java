@@ -10,16 +10,19 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 public class IndexerM extends Mapper<Object, Text, Text, Posting>{
 
+    private static final String EDU = ".edu";
     private static IntWritable one = new IntWritable(1);
     private Text word = new Text();
     private Text file = new Text();
 
-    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-
-      // Need to parse the website name from filenames
+    public String fileName(Context context) {
       String fileName = ((FileSplit) context.getInputSplit()).getPath().getName();
-      file.set(fileName);
+      fileName = fileName.split(EDU)[0] + EDU;
+      return fileName;
+    }
 
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+      file.set(fileName(context));
       StringTokenizer itr = new StringTokenizer(value.toString());
       while (itr.hasMoreTokens()) {
         word.set(itr.nextToken());
