@@ -1,4 +1,4 @@
-package edu.ucr.abhi;
+package edu.ucr.abhi.pojos;
 
 import org.apache.hadoop.io.Text;
 
@@ -47,7 +47,7 @@ public class Aggregator {
 
     @Override
     public String toString() {
-        return this.root.toString() + this.hyperlink.toString() + "|" + this.title.toString();
+        return this.root.toString() + "|" + this.hyperlink.toString() + "|" + this.title.toString();
     }
     
     public static Aggregator create(Posting posting) {

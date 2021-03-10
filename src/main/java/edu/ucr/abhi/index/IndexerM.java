@@ -1,4 +1,7 @@
-package edu.ucr.abhi;
+package edu.ucr.abhi.index;
+
+import edu.ucr.abhi.pojos.Posting;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.StringTokenizer;
@@ -36,7 +39,7 @@ public class IndexerM extends Mapper<Object, Text, Text, Posting>{
         StringTokenizer itr = new StringTokenizer(elem.ownText());
 
         while (itr.hasMoreTokens()) {
-          word.set(itr.nextToken());
+          word.set(itr.nextToken().toLowerCase());
           context.write(word, new Posting(root, hyperlink, title, one));
         }
       }

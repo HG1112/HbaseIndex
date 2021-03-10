@@ -1,13 +1,20 @@
-package edu.ucr.abhi;
+package edu.ucr.abhi.pojos;
+
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
 
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
-public class Posting implements Writable  {
+public class Posting implements Writable {
 
     private Text root;
     private Text hyperlink;
@@ -77,6 +84,23 @@ public class Posting implements Writable  {
 
     @Override
     public String toString() {
-        return this.root.toString() + this.hyperlink.toString() + "|" + this.count.toString();
+        return this.root.toString() + "|" + this.hyperlink.toString() + "|" + this.title.toString() + "|" + this.count.toString();
+    }
+
+    public static List<Posting> fromResult(Result result) {
+        Text r = new Text();
+        Text h = new Text();
+        Text t = new Text();
+        IntWritable c = new IntWritable(0);
+        NavigableMap<byte[], NavigableMap<byte[], byte[]>> map = result.getNoVersionMap();
+        List<Posting> postings = new ArrayList<Posting>();
+        for (byte[] cf : map.keySet()) {
+            r.set(Bytes.toString(cf));
+            h.set(Bytes.toString(result.getValue(cf, Bytes.toBytes("href"))));
+            t.set(Bytes.toString(result.getValue(cf, Bytes.toBytes("title"))));
+            c.set(Integer.parseInt(Bytes.toString(result.getValue(cf, Bytes.toBytes("count")))));
+            postings.add(new Posting(r,h,t,c));
+        }
+        return postings;
     }
 }

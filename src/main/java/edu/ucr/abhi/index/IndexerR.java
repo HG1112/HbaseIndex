@@ -1,8 +1,9 @@
-package edu.ucr.abhi;
+package edu.ucr.abhi.index;
+
+import edu.ucr.abhi.pojos.*;
+
 import java.io.IOException;
 import java.util.HashMap;
-
-import com.google.gson.Gson;
 
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -11,8 +12,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 
 public class IndexerR  extends TableReducer<Text, Posting, ImmutableBytesWritable> {
-
-    private static final Gson gson = new Gson();
 
     @Override
     protected void reduce(
@@ -32,7 +31,7 @@ public class IndexerR  extends TableReducer<Text, Posting, ImmutableBytesWritabl
             map.put(agg, count);
           }
         }
-
+        
         // TODO : this is only insert , need to handle update case where the key already is put
         ImmutableBytesWritable key = new ImmutableBytesWritable(Bytes.toBytes(word.toString()));
         Put put = new Put(Bytes.toBytes(word.toString()));

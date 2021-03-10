@@ -1,4 +1,7 @@
-package edu.ucr.abhi;
+package edu.ucr.abhi.index;
+
+import edu.ucr.abhi.pojos.Posting;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
