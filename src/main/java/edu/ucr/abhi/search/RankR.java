@@ -24,10 +24,11 @@ public class RankR extends Reducer<Text, Posting, Text, Text>{
     throws IOException, InterruptedException {
         List<Posting> list = new ArrayList<Posting>();
         for (Posting posting: value) {
+            System.out.println("Reduce : " + posting);
             list.add(posting);
         }
         list.sort(new PostingComparator());
-        result.set(gson.toJson(list.subList(0, 9)));
+        result.set(gson.toJson(list));
         context.write(key, result);
     }
 }

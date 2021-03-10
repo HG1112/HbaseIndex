@@ -1,5 +1,7 @@
 package edu.ucr.abhi.pojos;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.hadoop.io.Text;
 
 public class Aggregator {
@@ -40,9 +42,28 @@ public class Aggregator {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        Aggregator agg = (Aggregator) obj;
-        return agg.getRoot() == root && agg.getHyperlink() == hyperlink && agg.getTitle() == title;
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(root)
+                .append(hyperlink)
+                .append(title)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Aggregator)) {
+            return false;
+        }
+
+        Aggregator aggregator = (Aggregator) o;
+
+        return new EqualsBuilder()
+                .append(root, aggregator.root)
+                .append(hyperlink, aggregator.hyperlink)
+                .append(title, aggregator.title)
+                .isEquals();
     }
 
     @Override

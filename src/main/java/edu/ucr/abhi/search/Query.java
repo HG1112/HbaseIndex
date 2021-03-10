@@ -1,5 +1,7 @@
 package edu.ucr.abhi.search;
 
+import java.util.Set;
+
 import org.apache.hadoop.hbase.client.Scan;
 
 
@@ -13,6 +15,9 @@ public class Query {
     }
 
     public static boolean match(String rowKey, String query) {
+        return query.contains(rowKey);
+    }
+    public static boolean match(String rowKey, Set<String> query) {
         return query.contains(rowKey);
     }
 }
