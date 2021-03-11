@@ -4,7 +4,13 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import com.google.gson.Gson;
+import java.lang.reflect.Type;
+import com.google.gson.reflect.TypeToken;
+
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -34,11 +40,11 @@ public class Posting implements Writable {
         count = c;
     }
     
-    public Posting(byte[] r, byte[] h, byte[] t, byte[] c) {
-        root = new Text(Bytes.toString(r));
-        hyperlink = new Text(Bytes.toString(h));
-        title = new Text(Bytes.toString(t));
-        count = new IntWritable(Integer.parseInt(Bytes.toString(c)));
+    public Posting(String  r, String h, String t, Integer c) {
+        root = new Text(r);
+        hyperlink = new Text(h);
+        title = new Text(t);
+        count = new IntWritable(c);
     }
     
     @Override
@@ -122,16 +128,21 @@ public class Posting implements Writable {
     }
     
     public static List<Posting> fromResult(Result result) {
+        String json = Bytes.toString(result.getValue(Bytes.toBytes("index"), Bytes.toBytes("json")));
+        Gson gson = new Gson();
         List<Posting> postings = new ArrayList<Posting>();
-        for (byte[] cf : result.getMap().keySet()) {
-            postings.add(
-                new Posting(
-                    cf,
-                    result.getValue(cf, Bytes.toBytes("href")),
-                    result.getValue(cf, Bytes.toBytes("title")),
-                    result.getValue(cf, Bytes.toBytes("count"))
-                )
-            );
+        HashMap<String, HashMap<String, Integer>> m2;
+        HashMap<String, Integer> m1;
+        Type type = new TypeToken<HashMap<String, HashMap<String, HashMap<String, Integer>>>>(){}.getType();
+        HashMap<String, HashMap<String, HashMap<String, Integer>>> map = gson.fromJson(json, type);
+        for (String root : map.keySet()) {
+            m2 = map.get(root);
+            for (String title: m2.keySet()) {
+                m1 = m2.get(title);
+                for (String href : m1.keySet()) {
+                    postings.add(new Posting(root, href, title, m1.get(href)));
+                }
+            }
         }
         return postings;
     }
