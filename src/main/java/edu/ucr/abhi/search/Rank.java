@@ -1,9 +1,17 @@
 package edu.ucr.abhi.search;
+import java.io.OutputStream;
+import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
+import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -16,30 +24,31 @@ import edu.ucr.abhi.pojos.Posting;
 
 
 public class Rank extends Configured implements Tool{
+    
+    private static final Log log = LogFactory.getLog(Rank.class);
     @Override
     public int run(String[] args) throws Exception {
         
-        String query = args[0].toLowerCase();
-
-        Configuration conf = getConf();
-        conf.set(Search.QUERY, query);
-        setConf(HBaseConfiguration.create(conf));
-
-        Job job = Job.getInstance(getConf() ,"Searching for " + query);
+        String query = args[0];
+        
+        Job job = Job.getInstance(getConf() , Search.RJOB + query);
         job.setJarByClass(Rank.class);
-        String table = "search";
+        String table = getConf().get(Search.TABLE);
+
+        log.info("Read hbase table with name :" + table);
+
         TableMapReduceUtil.initTableMapperJob(
             table,      // input table
             Query.getScan(),             // Scan instance to control CF and attribute selection
             RankM.class,   // mapper class
-            Text.class,             // mapper output key
+            FloatWritable.class,             // mapper output key
             Posting.class,             // mapper output value
             job
         );
         
-        // job.setReducerClass(RankR.class);
+        job.setReducerClass(RankR.class);
         job.setOutputFormatClass(TextOutputFormat.class);
-        job.setOutputKeyClass(Text.class);
+        job.setOutputKeyClass(FloatWritable.class);
         job.setOutputValueClass(Text.class);
         
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -49,15 +58,22 @@ public class Rank extends Configured implements Tool{
     public static void main(String[] args) throws Exception {
         int result;
         try{
-            result= ToolRunner.run(new Configuration(), new Rank(), args);
+            Properties properties = new Properties();
+            properties.load(Rank.class.getClassLoader().getResourceAsStream(Search.PROPS));
+      
+            Configuration conf = HBaseConfiguration.create();
+            conf.set(Search.TABLE, properties.getProperty(Search.TABLE));
+            conf.set(Search.ICF, properties.getProperty(Search.ICF));
+            conf.set(Search.ICQ, properties.getProperty(Search.ICQ));
+
+            String query = args[0].toLowerCase();
+            conf.set(Search.QUERY, query);
+            log.info("Query :" + query);
+            result= ToolRunner.run(conf, new Rank(), args);
             if(0 == result)
-            {
-                System.out.println("Job completed Successfully...");
-            }
+                log.info("Job completed Successfully...");
             else
-            {
-                System.out.println("Job Failed...");
-            }
+                log.error("Job Failed...");
         }
         catch(Exception exception)
         {

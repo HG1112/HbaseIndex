@@ -3,14 +3,13 @@ package edu.ucr.abhi.pojos;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.Gson;
-import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
-
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -18,9 +17,9 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
-public class Posting implements Writable {
+public class Posting implements WritableComparable<Posting> {
     
     private Text root;
     private Text hyperlink;
@@ -127,8 +126,8 @@ public class Posting implements Writable {
         return this.root.toString() + "|" + this.hyperlink.toString() + "|" + this.title.toString() + "|" + this.count.toString();
     }
     
-    public static List<Posting> fromResult(Result result) {
-        String json = Bytes.toString(result.getValue(Bytes.toBytes("index"), Bytes.toBytes("json")));
+    public static List<Posting> fromResult(String cf, String cq, Result result) {
+        String json = Bytes.toString(result.getValue(Bytes.toBytes(cf), Bytes.toBytes(cq)));
         Gson gson = new Gson();
         List<Posting> postings = new ArrayList<Posting>();
         HashMap<String, HashMap<String, Integer>> m2;
@@ -145,5 +144,9 @@ public class Posting implements Writable {
             }
         }
         return postings;
+    }
+    @Override
+    public int compareTo(Posting o) {
+        return this.getCount().compareTo(o.getCount());
     }
 }
