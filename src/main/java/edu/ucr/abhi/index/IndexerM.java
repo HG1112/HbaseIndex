@@ -1,7 +1,5 @@
 package edu.ucr.abhi.index;
 
-import edu.ucr.abhi.pojos.Posting;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.StringTokenizer;
@@ -13,6 +11,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import edu.ucr.abhi.constants.Search;
+import edu.ucr.abhi.pojos.Posting;
 
 
 public class IndexerM extends Mapper<Object, Text, Text, Posting>{
@@ -33,8 +34,10 @@ public class IndexerM extends Mapper<Object, Text, Text, Posting>{
 
       for (Element elem : html.getAllElements()) {
 
-        if (elem.hasAttr("href")) 
-          hyperlink.set(elem.attr("href"));
+        if (context.getConfiguration().get(Search.IHREF).equals("true")) {
+          if (elem.hasAttr("href")) hyperlink.set(elem.attr("href"));
+        } else 
+          hyperlink.set("");
 
         StringTokenizer itr = new StringTokenizer(elem.ownText());
 
