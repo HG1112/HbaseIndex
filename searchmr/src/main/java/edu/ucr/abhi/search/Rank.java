@@ -1,6 +1,6 @@
 package edu.ucr.abhi.search;
 import java.io.OutputStream;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,8 +29,7 @@ public class Rank extends Configured implements Tool{
     @Override
     public int run(String[] args) throws Exception {
         
-        String query = args[0];
-        
+        String query = getConf().get(Search.QUERY);
         Job job = Job.getInstance(getConf() , Search.RJOB + query);
         job.setJarByClass(Rank.class);
         String table = getConf().get(Search.TABLE);
@@ -51,7 +50,7 @@ public class Rank extends Configured implements Tool{
         job.setOutputKeyClass(FloatWritable.class);
         job.setOutputValueClass(Text.class);
         
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileOutputFormat.setOutputPath(job, new Path(args[0]));
         job.waitForCompletion(true);
         return job.isSuccessful() ? 0 : -1;
     }
@@ -66,7 +65,12 @@ public class Rank extends Configured implements Tool{
             conf.set(Search.ICF, properties.getProperty(Search.ICF));
             conf.set(Search.ICQ, properties.getProperty(Search.ICQ));
 
-            String query = args[0].toLowerCase();
+	    StringBuilder sb = new StringBuilder();
+	    for (int i=1;i<args.length;++i) {
+		    sb.append(args[i]);
+		    sb.append(" ");
+	    }
+	    String query = sb.toString();
             conf.set(Search.QUERY, query);
             log.info("Query :" + query);
             result= ToolRunner.run(conf, new Rank(), args);
