@@ -13,7 +13,7 @@
         <th>Score</th>
     </tr>
 
-    <th:block th:each="result : ${results}">
+    <th:block th:each="result : ${lucene}">
         <tr>
             <td th:text="${result.num}"></td>
             <td th:text="${result.title}"></td>
@@ -24,6 +24,24 @@
     </th:block>
 </table>
 
+<table>
+    <tr>
+        <th>Number</th>
+        <th>Title</th>
+        <th>URL</th>
+        <th>Score</th>
+    </tr>
+
+    <th:block th:each="result : ${hadoop}">
+        <tr>
+            <td th:text="${result.num}"></td>
+            <td th:text="${result.title}"></td>
+            <td th:text="${result.url}"></td>
+            <td th:text="${result.score}"></td>
+
+        </tr>
+    </th:block>
+</table>
 
 <a href="#" onclick="history.go(-1)"><h1> Want to search more? Go Back.....</h1></a>
 
